@@ -218,8 +218,6 @@ dtb-$(CONFIG_ARCH_MSM8992) += msm8992-sim.dtb \
 	msm8992-pmi8994-pm8004-mtp.dtb
 dtb-$(CONFIG_ARCH_MDMFERMIUM) += mdmfermium-rumi.dtb
 
-CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES = $(ZTEMT_DTS_NAME)
-$(warning mhx$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
 DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
 ifneq ($(DTB_NAMES),)
 DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))

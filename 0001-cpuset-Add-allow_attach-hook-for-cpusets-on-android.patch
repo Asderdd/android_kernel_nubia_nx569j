@@ -1,0 +1,49 @@
+From f63b1571d1fdb6c76187e01ce152d7c5966ee044 Mon Sep 17 00:00:00 2001
+From: Riley Andrews <riandrews@google.com>
+Date: Fri, 5 Jun 2015 18:59:29 -0700
+Subject: [PATCH 1/2] cpuset: Add allow_attach hook for cpusets on android.
+
+Change-Id: Ic1b61b2bbb7ce74c9e9422b5e22ee9078251de21
+---
+ kernel/cpuset.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/kernel/cpuset.c b/kernel/cpuset.c
+index 067750b..773bcbc 100644
+--- a/kernel/cpuset.c
++++ b/kernel/cpuset.c
+@@ -1415,6 +1415,23 @@ out_unlock:
+ 	return ret;
+ }
+ 
++static int cpuset_allow_attach(struct cgroup *cgrp,
++			       struct cgroup_taskset *tset)
++{
++	const struct cred *cred = current_cred(), *tcred;
++	struct task_struct *task;
++
++	cgroup_taskset_for_each(task, cgrp, tset) {
++		tcred = __task_cred(task);
++
++		if ((current != task) && !capable(CAP_SYS_ADMIN) &&
++		    cred->euid != tcred->uid && cred->euid != tcred->suid)
++			return -EACCES;
++	}
++
++	return 0;
++}
++
+ static void cpuset_cancel_attach(struct cgroup *cgrp,
+ 				 struct cgroup_taskset *tset)
+ {
+@@ -1969,6 +1986,7 @@ struct cgroup_subsys cpuset_subsys = {
+ 	.css_offline = cpuset_css_offline,
+ 	.css_free = cpuset_css_free,
+ 	.can_attach = cpuset_can_attach,
++	.allow_attach = cpuset_allow_attach,
+ 	.cancel_attach = cpuset_cancel_attach,
+ 	.attach = cpuset_attach,
+ 	.subsys_id = cpuset_subsys_id,
+-- 
+2.7.4
+
